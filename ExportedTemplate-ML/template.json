@@ -1,0 +1,270 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "containerGroups_predict_auto_price_XNHM41Fas0m3XxQUomjwaA_name": {
+            "defaultValue": "predict-auto-price-XNHM41Fas0m3XxQUomjwaA",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2023-05-01",
+            "name": "[parameters('containerGroups_predict_auto_price_XNHM41Fas0m3XxQUomjwaA_name')]",
+            "location": "centralindia",
+            "tags": {
+                "CreatedByAMLStudio": "true",
+                "EmittingService": "Machine Learning service - Non DSVM"
+            },
+            "properties": {
+                "sku": "Standard",
+                "containers": [
+                    {
+                        "name": "predict-auto-price",
+                        "properties": {
+                            "image": "e3ccd15c5a5149b3b75f1414a268f068.azurecr.io/azureml/azureml_d9b250abb9df73813a41440e25ad00bd",
+                            "command": [
+                                "runsvdir",
+                                "/var/runit"
+                            ],
+                            "ports": [
+                                {
+                                    "port": 5001
+                                }
+                            ],
+                            "environmentVariables": [
+                                {
+                                    "name": "AML_APP_INSIGHTS_ENABLED",
+                                    "value": "false"
+                                },
+                                {
+                                    "name": "AML_MODEL_DC_STORAGE_ENABLED",
+                                    "value": "false"
+                                },
+                                {
+                                    "name": "SCORING_TIMEOUT_MS",
+                                    "value": "60000"
+                                },
+                                {
+                                    "name": "SERVICE_NAME",
+                                    "value": "predict-auto-price"
+                                },
+                                {
+                                    "name": "SERVICE_ID",
+                                    "value": "2944da3f-0d67-4cad-89f7-90d8939a48aa"
+                                },
+                                {
+                                    "name": "WORKSPACE_NAME",
+                                    "value": "ML_project"
+                                },
+                                {
+                                    "name": "COMPUTE_NAME",
+                                    "value": "predict-auto-price"
+                                },
+                                {
+                                    "name": "COMPUTE_TYPE",
+                                    "value": "ACI"
+                                },
+                                {
+                                    "name": "COMPUTE_LOCATION",
+                                    "value": "centralindia"
+                                },
+                                {
+                                    "name": "AZUREML_MODEL_DIR",
+                                    "value": "/var/azureml-app/azureml-models/amlstudio-predict-auto-price/1"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 0.5,
+                                    "cpu": 0.1
+                                }
+                            },
+                            "volumeMounts": [
+                                {
+                                    "name": "aci-mount-dir",
+                                    "mountPath": "/var/azureml-app",
+                                    "readOnly": false
+                                },
+                                {
+                                    "name": "aci-signal-dir",
+                                    "mountPath": "/var/aml_signal_root",
+                                    "readOnly": true
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "azureml-fe-aci",
+                        "properties": {
+                            "image": "mcr.microsoft.com/azureml-aci-frontend:20210908.1",
+                            "ports": [
+                                {
+                                    "port": 443
+                                },
+                                {
+                                    "port": 80
+                                }
+                            ],
+                            "environmentVariables": [
+                                {
+                                    "name": "AuthEnabled",
+                                    "value": "True"
+                                },
+                                {
+                                    "name": "ScoringPort",
+                                    "value": "5001"
+                                },
+                                {
+                                    "name": "SslEnabled",
+                                    "value": "False"
+                                },
+                                {
+                                    "name": "SERVICE_NAME",
+                                    "value": "predict-auto-price"
+                                },
+                                {
+                                    "name": "FRONTEND_IMAGE",
+                                    "value": "mcr.microsoft.com/azureml-aci-frontend:20210908.1"
+                                },
+                                {
+                                    "name": "SUBSCRIPTION_ID",
+                                    "value": "9b399039-d5f3-4668-9b0d-fce4e6fa3591"
+                                },
+                                {
+                                    "name": "RESOURCE_GROUP",
+                                    "value": "ML"
+                                },
+                                {
+                                    "name": "WORKSPACE_NAME",
+                                    "value": "ML_project"
+                                },
+                                {
+                                    "name": "MMS_REGION",
+                                    "value": "centralindia"
+                                },
+                                {
+                                    "name": "HAS_CURL",
+                                    "value": "true"
+                                },
+                                {
+                                    "name": "PrimaryKey",
+                                    "value": "y9D4hITCkZPlVsugJVA8UeitdNMdzfD4"
+                                },
+                                {
+                                    "name": "SecondaryKey",
+                                    "value": "S5nMHbpHlmrdfHQ1Rq6eFx2BnX8ZG3Ff"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 0.5,
+                                    "cpu": 0.1
+                                }
+                            },
+                            "volumeMounts": [
+                                {
+                                    "name": "secretsvolume",
+                                    "mountPath": "/mnt/secrets",
+                                    "readOnly": true
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "initContainers": [
+                    {
+                        "name": "azureml-init-aci",
+                        "properties": {
+                            "image": "mcr.microsoft.com/azureml/aci-init-container:20211118",
+                            "environmentVariables": [
+                                {
+                                    "name": "SERVICE_NAME",
+                                    "value": "predict-auto-price"
+                                },
+                                {
+                                    "name": "SUBSCRIPTION_ID",
+                                    "value": "9b399039-d5f3-4668-9b0d-fce4e6fa3591"
+                                },
+                                {
+                                    "name": "RESOURCE_GROUP",
+                                    "value": "ML"
+                                },
+                                {
+                                    "name": "WORKSPACE_NAME",
+                                    "value": "ML_project"
+                                },
+                                {
+                                    "name": "MMS_REGION",
+                                    "value": "centralindia"
+                                },
+                                {
+                                    "name": "INIT_CONTAINER_SIGNAL_FILE",
+                                    "value": "/tmp/aml_signal_root/init_complete.txt"
+                                },
+                                {
+                                    "name": "AML_INIT_CONFIG_LOCATION",
+                                    "value": "c6153214-5d82-443f-bb44-94e42c43992d"
+                                }
+                            ],
+                            "volumeMounts": [
+                                {
+                                    "name": "aci-mount-dir",
+                                    "mountPath": "/tmp/aml_mount_root",
+                                    "readOnly": false
+                                },
+                                {
+                                    "name": "aci-signal-dir",
+                                    "mountPath": "/tmp/aml_signal_root",
+                                    "readOnly": false
+                                },
+                                {
+                                    "name": "secretsvolume",
+                                    "mountPath": "/mnt/secrets",
+                                    "readOnly": true
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "imageRegistryCredentials": [
+                    {
+                        "server": "e3ccd15c5a5149b3b75f1414a268f068.azurecr.io",
+                        "username": "e3ccd15c5a5149b3b75f1414a268f068"
+                    }
+                ],
+                "ipAddress": {
+                    "ports": [
+                        {
+                            "port": 443
+                        },
+                        {
+                            "port": 80
+                        }
+                    ],
+                    "ip": "4.188.7.36",
+                    "type": "Public",
+                    "dnsNameLabel": "2944da3f-0d67-4cad-89f7-90d8939a48aa",
+                    "autoGeneratedDomainNameLabelScope": "Unsecure"
+                },
+                "osType": "Linux",
+                "volumes": [
+                    {
+                        "name": "secretsvolume",
+                        "secret": {}
+                    },
+                    {
+                        "name": "aci-mount-dir",
+                        "emptyDir": {}
+                    },
+                    {
+                        "name": "aci-signal-dir",
+                        "emptyDir": {}
+                    }
+                ]
+            }
+        }
+    ]
+}
